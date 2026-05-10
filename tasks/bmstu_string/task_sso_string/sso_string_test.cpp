@@ -376,3 +376,63 @@ TEST(SSOStringTest, SSOCapacity)
 	ASSERT_FALSE(long_str.is_using_sso());
 	ASSERT_GE(long_str.capacity(), long_str.size());
 }
+
+TEST(SSOStringTest, SSOReverseTest)
+{
+	bmstu::wstring short_str(L"Допер препод");
+	bmstu::wstring str2(L"Ԑőгру - пургőԑ");
+	bmstu::wstring str3(L"Ԑőгру - пургőԑ");
+	ASSERT_FALSE(short_str.is_using_sso());
+	ASSERT_TRUE(short_str.is_palindrome());
+	ASSERT_TRUE(str2.is_palindrome());
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest2)
+{
+	bmstu::wstring str3(L"Ԑőгру - пургőԑ");
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest3)
+{
+	bmstu::wstring str3(L"𮬀Ԑőгру - пургőԑ𮬀");
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest6)
+{
+	bmstu::wstring str3(L"𮬀Ԑőгру𮬀 - п𮬀ургőԑ𮬀");
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest4)
+{
+	bmstu::wstring str3(L"öooö");
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest5)
+{
+	bmstu::wstring str3(L"öooÖ");
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+
+TEST(SSOStringTest, SSOReverseTest100)
+{
+	bmstu::wstring str3(L"ö+ooÖ");
+	ASSERT_FALSE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest101)
+{
+	bmstu::wstring str3(L"+ö+oo+Ö+");
+	ASSERT_TRUE(str3.is_palindrome());
+}
+
+TEST(SSOStringTest, SSOReverseTest102)
+{
+	bmstu::wstring str3(L"+ö+oo+Ö++");
+	ASSERT_FALSE(str3.is_palindrome());
+}

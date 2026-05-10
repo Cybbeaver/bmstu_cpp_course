@@ -1,5 +1,7 @@
 #pragma once
 
+#include <clocale>
+#include <cwctype>
 #include <algorithm>  // для std::max
 #include <cstring>	  // для std::memcpy
 #include <exception>
@@ -7,13 +9,6 @@
 
 namespace bmstu
 {
-template <typename T>
-class basic_string;
-
-using string = basic_string<char>;
-using wstring = basic_string<wchar_t>;
-using u16string = basic_string<char16_t>;
-using u32string = basic_string<char32_t>;
 
 template <typename T>
 class basic_string
@@ -396,8 +391,78 @@ class basic_string
 	T* data() { return get_ptr(); }
 
 	const T* data() const { return get_ptr(); }
+	// Дополнительное задание
+	bool is_palindrome() const
+	{
+		if (get_size() < 1)
+			return true;
+
+		size_t left = 0;
+		size_t right = get_size() - 1;
+		const T* ptr = get_ptr();
+		while (left < right)
+		{
+			if (!udv(ptr[left]))
+				left++;
+			else if (!udv(ptr[right]))
+				right--;
+			else
+			{
+				if (small(ptr[left]) != small(ptr[right]))
+					return false;
+				left++;
+				right--;
+			}
+		}
+		return true;
+	}
 
    private:
+	//Доп. задание
+	static bool udv(char c)
+	{
+		/*return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			   (c >= '0' && c <= '9');*/
+		switch (c) {
+        case ' ': case '\t': case '\n': case '\r':
+        case '.': case ',': case '!': case '?': case ':': case ';':
+        case '-': case '(': case ')': case '"': case '\'':
+            return false;
+        default:
+            return true;
+    }
+	}
+	static bool udv(wchar_t c)
+	{
+		/*return (c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z') ||
+			   (c >= L'0' && c <= L'9') || (c >= L'а' && c <= L'я') ||
+			   (c >= L'А' && c <= L'Я') || c == L'ё' || c == L'Ё';*/
+		switch (c) {
+        case L' ': case L'\t': case L'\n': case L'\r':
+        case L'.': case L',': case L'!': case L'?': case L':': case L';':
+        case L'-': case L'(': case L')': case L'"': case L'\'':
+            return false;
+        default:
+            return true;
+    }
+	}
+	static char small(char c)
+	{
+		if (c >= 'A' && c <= 'Z')
+			return c + ('a' - 'A');
+		return c;
+	}
+	static wchar_t small(wchar_t c)
+	{
+		setlocale(LC_ALL, "");
+		/*if (c >= L'A' && c <= L'Z')
+			return c + (L'a' - L'A');
+		if (c >= L'А' && c <= L'Я')
+			return c + (L'а' - L'А');
+		if (c == L'Ё')
+			return L'ё';*/
+		return towlower(c);
+	}
 	static size_t strlen_(const T* str)
 	{
 		size_t len = 0;
@@ -423,4 +488,9 @@ class basic_string
 		data_.short_str.buffer[0] = '\0';
 	}
 };
+
+using string = basic_string<char>;
+using wstring = basic_string<wchar_t>;
+using u16string = basic_string<char16_t>;
+using u32string = basic_string<char32_t>;
 }  // namespace bmstu
