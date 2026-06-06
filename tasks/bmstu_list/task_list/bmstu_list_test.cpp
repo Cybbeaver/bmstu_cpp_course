@@ -536,3 +536,14 @@ TEST(BidirectLinkedListTests, from_vector)
 										"string7"s, "end_string"s}),
 			  my_vec);
 }
+
+TEST(BidirectLinkedListTests, DummyTest)
+{
+
+	bmstu::list<int> l1 = {1,2,3,4,5,6,7};
+	bmstu::list<int> l2 = {7,6,5,4,3,2,1};
+
+	l1.reverse();
+	ASSERT_EQ(l1,l2);
+
+}

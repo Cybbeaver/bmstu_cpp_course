@@ -428,7 +428,22 @@ class list
 		++size_;
 		return iterator{new_node};
 	}
-	
+	list& reverse(){
+		node* oldF = head_.next_node_;
+		node* oldL = tail_.prev_node_;
+		node* cur = head_.next_node_;
+		while(cur != &tail_) {
+			node* tmp = cur -> next_node_;
+			cur -> next_node_ = cur -> prev_node_;
+			cur -> prev_node_ = tmp;
+			cur = tmp;
+		}
+		head_.next_node_ = oldL;
+		oldL -> prev_node_ = &head_;
+		tail_.prev_node_ = oldF;
+		oldF -> next_node_ = &tail_;
+		return *this;
+	}
 
    private:
 	static auto lexicographical_compare_(const list<T>& l, const list<T>& r)

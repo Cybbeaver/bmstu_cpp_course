@@ -7,44 +7,63 @@
 namespace bmstu
 {
 template <typename T>
+struct remove_const
+{
+	using type = T;
+};
+template <typename T>
+struct remove_const<const T>
+{
+	using type = T;
+};
+template <typename T>
+using remove_const_t = typename remove_const<T>::type;
+template <typename T>
 class simple_vector
 {
    public:
-	class iterator
-		: public abstract_iterator<iterator, T, std::contiguous_iterator_tag>
+	template <typename ValueType>
+	class main_iterator : public abstract_iterator<main_iterator<ValueType>,
+												   ValueType,
+												   std::contiguous_iterator_tag>
 	{
 	   public:
-		using base =
-			abstract_iterator<iterator, T, std::contiguous_iterator_tag>;
+		template <typename>
+		friend class main_iterator;
+
+		using base = abstract_iterator<main_iterator<ValueType>,
+									   ValueType,
+									   std::contiguous_iterator_tag>;
 		using typename base::difference_type;
 		using typename base::pointer;
 		using typename base::reference;
 
-		iterator() = default;
+		main_iterator() = default;
+		using value_type = bmstu::remove_const_t<ValueType>;
 
-		iterator(const iterator& other) = default;
+		main_iterator(std::nullptr_t) noexcept : ptr_(nullptr) {}
 
-		iterator(std::nullptr_t) noexcept : ptr_(nullptr) {}
+		explicit main_iterator(pointer ptr) : ptr_(ptr) {}
+		main_iterator(const main_iterator& other) = default;
 
-		iterator(iterator&& other) noexcept : ptr_(other.ptr_)
+		template <typename OtherValueType>
+		main_iterator(const main_iterator<OtherValueType>& other) noexcept
+			: ptr_(other.ptr_)
 		{
-			other.ptr_ = nullptr;
 		}
-
-		explicit iterator(pointer ptr) : ptr_(ptr) {}
 
 		reference operator*() const override { return *ptr_; }
 
 		pointer operator->() const override { return ptr_; }
 
-		friend pointer to_address(const iterator& it) noexcept
+		friend pointer to_address(const main_iterator& it) noexcept
 		{
 			return it.ptr_;
 		}
 
-		iterator& operator=(const iterator& other) = default;
+		main_iterator& operator=(const main_iterator& other) = default;
 
-		iterator& operator=(iterator&& other) noexcept
+		main_iterator& operator=(main_iterator&& other) noexcept
 		{
 			if (this != &other)
 			{
@@ -55,86 +74,87 @@ class simple_vector
 		}
 
 #pragma region Operators
-		iterator& operator++() override
+		main_iterator& operator++() override
 		{
 			++ptr_;
 			return *this;
 		}
 
-		iterator& operator--() override
+		main_iterator& operator--() override
 		{
 			--ptr_;
 			return *this;
 		}
 
-		iterator operator++(int) override
+		main_iterator operator++(int) override
 		{
-			iterator tmp = *this;
+			main_iterator tmp = *this;
 			ptr_++;
 			return tmp;
 		}
 
-		iterator operator--(int) override
+		main_iterator operator--(int) override
 		{
-			iterator tmp = *this;
+			main_iterator tmp = *this;
 			ptr_--;
 			return tmp;
 		}
 
 		explicit operator bool() const override { return ptr_ != nullptr; }
 
-		bool operator==(const iterator& other) const override
+		bool operator==(const main_iterator& other) const override
 		{
 			return ptr_ == other.ptr_;
 		}
 
-		friend bool operator==(const iterator& lhs, std::nullptr_t)
+		friend bool operator==(const main_iterator& lhs, std::nullptr_t)
 		{
 			return lhs.ptr_ == nullptr;
 		}
 
-		iterator& operator=(std::nullptr_t) noexcept
+		main_iterator& operator=(std::nullptr_t) noexcept
 		{
 			ptr_ = nullptr;
 			return *this;
 		}
 
-		friend bool operator==(std::nullptr_t, const iterator& rhs)
+		friend bool operator==(std::nullptr_t, const main_iterator& rhs)
 		{
 			return rhs.ptr_ == nullptr;
 		}
-		difference_type operator-(const iterator& other) const override
+		difference_type operator-(const main_iterator& other) const override
 		{
 			return ptr_ - other.ptr_;
 		}
-		bool operator!=(const iterator& other) const override
+		bool operator!=(const main_iterator& other) const override
 		{
 			return ptr_ != other.ptr_;
 		}
 
-		iterator operator+(const difference_type& n) const override
+		main_iterator operator+(const difference_type& n) const override
 		{
-			return iterator(ptr_ + n);
+			return main_iterator(ptr_ + n);
 		}
 
-		iterator& operator+=(const difference_type& n) override
+		main_iterator& operator+=(const difference_type& n) override
 		{
 			ptr_ += n;
 			return *this;
 		}
 
-		iterator operator-(const difference_type& n) const override
+		main_iterator operator-(const difference_type& n) const override
 		{
-			return iterator(ptr_ - n);
+			return main_iterator(ptr_ - n);
 		}
 
-		iterator& operator-=(const difference_type& n) override
+		main_iterator& operator-=(const difference_type& n) override
 		{
 			ptr_ -= n;
 			return *this;
 		}
 
-		friend auto operator<=>(const iterator& lhs, const iterator& rhs)
+		friend auto operator<=>(const main_iterator& lhs,
+								const main_iterator& rhs)
 		{
 			return lhs.ptr_ <=> rhs.ptr_;
 		}
@@ -144,6 +164,9 @@ class simple_vector
 	   private:
 		pointer ptr_ = nullptr;
 	};
+
+	using iterator = main_iterator<T>;
+	using const_iterator = main_iterator<const T>;
 
 	simple_vector() noexcept = default;
 
@@ -208,17 +231,21 @@ class simple_vector
 	}
 
 	iterator begin() noexcept { return iterator(data_.get()); }
-
-	iterator end() noexcept { return iterator(data_.get() + size_); }
-
-	using const_iterator = iterator;
-
 	const_iterator begin() const noexcept
 	{
 		return const_iterator(data_.get());
 	}
+	const_iterator cbegin() const noexcept
+	{
+		return const_iterator(data_.get());
+	}
 
+	iterator end() noexcept { return iterator(data_.get() + size_); }
 	const_iterator end() const noexcept
+	{
+		return const_iterator(data_.get() + size_);
+	}
+	const_iterator cend() const noexcept
 	{
 		return const_iterator(data_.get() + size_);
 	}

@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include <sstream>
-
+#include <type_traits>
 TEST(SimpleVector, DefaultConstructor)
 {
 	bmstu::simple_vector<int> v;
@@ -473,10 +473,36 @@ TEST(SimpleVector, PushBackCopyMove2)
 	ASSERT_EQ(original.value, 0);
 }
 
-TEST(SimpleVector, PushBackCopyMove3)
+/*
+struct dumbnator {
+	dumbnator a;
+}; */
+
+
+struct dumbnator {
+	dumbnator* a;
+}; 
+TEST(SimpleVector, NOTConstIteratorTest)
 {
-	bmstu::simple_vector<int> v;
-	v.push_back(42);
+	bmstu::simple_vector<int> v{1,2,3};
 	auto it = v.begin();
-	it = nullptr;
+	*it = 5;
+	std::cout << v[0] << std::endl;
 }
+TEST(SimpleVector, ConstIteratorTest)
+{
+	bmstu::simple_vector<int> v{1,2,3};
+	auto it = v.cbegin();
+	EXPECT_EQ(*it, 1);
+	++it;
+	EXPECT_EQ(*it, 2);
+	bool is_const_iterator = std::is_same_v<decltype(it), bmstu::simple_vector<int>::const_iterator>;
+    EXPECT_TRUE(is_const_iterator);
+}
+/*TEST(SimpleVector, ERRORConstIteratorTest)
+{
+	bmstu::simple_vector<int> v{1,2,3};
+	auto it = v.cbegin();
+	*it = 5;
+	std::cout << v[0] << std::endl;
+}*/
